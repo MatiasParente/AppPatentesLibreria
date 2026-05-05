@@ -31,8 +31,8 @@ public class PlateRecognizer {
     public void analyze(Bitmap plateCrop, ScannerCallback callback) {
 
         executor.execute(() -> {
-            // Pre-procesamiento: Reescalado inteligente (Máximo 900px de ancho)
-            int targetW = Math.min(plateCrop.getWidth() * 2, 600);
+            // Pre-procesamiento: Reescalado inteligente
+            int targetW = Math.min(plateCrop.getWidth() * 2, 900);
             float ratio = (float) targetW / plateCrop.getWidth();
             int targetH = (int) (plateCrop.getHeight() * ratio);
 
