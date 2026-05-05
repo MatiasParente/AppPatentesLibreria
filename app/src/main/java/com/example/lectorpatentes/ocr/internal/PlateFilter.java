@@ -125,4 +125,54 @@ public class PlateFilter {
         canvas.drawBitmap(src, matrix, paint);
         return dst;
     }
+
+    public static Bitmap plancharEsquinaSuperiorDerecha(Bitmap src) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        Bitmap dst = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(dst);
+
+        // Definimos hacia dónde queremos llevar los puntos (un rectángulo perfecto)
+        float[] dstPoints = {0, 0, w, 0, w, h, 0, h};
+
+        // Mapeamos la deformación:
+        // La esquina superior derecha (punto 2) está "lejos", la estiramos.
+        float[] srcPoints = {
+                w * 0.10f, h * 0.35f,
+                w * 0.95f, h * 0.05f,
+                w * 1.15f, h * 0.80f,
+                w * 0.05f, h * 0.95f
+        };
+
+        Matrix matrix = new Matrix();
+        matrix.setPolyToPoly(srcPoints, 0, dstPoints, 0, 4);
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        canvas.drawBitmap(src, matrix, paint);
+        return dst;
+    }
+
+    public static Bitmap plancharEsquinaSuperiorIzquierda(Bitmap src) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        Bitmap dst = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(dst);
+
+        float[] dstPoints = {0, 0, w, 0, w, h, 0, h};
+
+        // La esquina superior izquierda
+        float[] srcPoints = {
+                -w * 0.05f, h * 0.05f,
+                w * 0.90f, h * 0.35f,
+                w * 0.95f, h * 0.95f,
+                -w * 0.15f, h * 0.80f
+        };
+
+        Matrix matrix = new Matrix();
+        matrix.setPolyToPoly(srcPoints, 0, dstPoints, 0, 4);
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        canvas.drawBitmap(src, matrix, paint);
+        return dst;
+    }
 }

@@ -6,51 +6,77 @@ import java.util.regex.Pattern;
 
 public class PlateValidator {
 
+    // Formatos RegEx
+    private static final String PATTERN_URU_AUTO = "^[A-Z]{3}[0-9]{4}$";
+    private static final String PATTERN_URU_MOTO = "^[A-Z]{3}[0-9]{3}$";
+    private static final String PATTERN_ARG_OLD = "^[A-Z]{3}[0-9]{3}$";
+    private static final String PATTERN_MERCOSUR_ARG = "^[A-Z]{2}[0-9]{3}[A-Z]{2}$";
+    private static final String PATTERN_MERCOSUR_BRA = "^[A-Z]{3}[0-9][A-Z][0-9]{2}$";
+
     public static String extraerPatente(Text visionText) {
-        StringBuilder sb = new StringBuilder();
+        String[] blacklist = {
+                "MERCOSUR", "BRASIL", "URUGUAY", "ARGENTINA",
+                "REPUBLICA", "ORIENTAL", "CONSU DE", "TEST"
+        };
+
         for (Text.TextBlock block : visionText.getTextBlocks()) {
-            sb.append(block.getText().toUpperCase().replace("\n", "").replace(" ", ""));
-        }
+            String raw = block.getText().toUpperCase();
 
-        String raw = sb.toString()
-                .replace("URUGUAY", "").replace("MERCOSUR", "")
-                .replace("ARGENTINA", "").replace("BRASIL", "")
-                .replaceAll("[^A-Z0-9]", "");
+            for (String word : blacklist) {
+                raw = raw.replace(word, "");
+            }
 
-        // Buscamos patrones de 6 a 7 caracteres
-        Matcher m = Pattern.compile("[A-Z0-9]{6,7}").matcher(raw);
+            raw = raw.replaceAll("\\s+", "") // Quita espacios y saltos
+                    .replaceAll("[^A-Z0-9]", ""); // Solo deja letras y números
 
-        if (m.find()) {
-            return identificarYCorregir(m.group());
+            if (raw.length() >= 6 && raw.length() <= 8) {
+                String corregida = procesarSegunFormato(raw);
+                if (!corregida.isEmpty()) return corregida;
+            }
         }
         return "";
     }
 
-    private static String identificarYCorregir(String candidato) {
-        // es uruguaya (3 Letras + 3 o 4 Números)
-        if (candidato.matches("^[A-Z0-9]{3}[0-9A-Z]{3,4}$")) {
-            char[] c = candidato.toCharArray();
-            StringBuilder res = new StringBuilder();
+    private static String procesarSegunFormato(String raw) {
+        int len = raw.length();
 
-            for (int i = 0; i < c.length; i++) {
-                if (i < 3) {
-                    res.append(forzarLetra(c[i])); // Las primeras 3 siempre letras
-                } else {
-                    res.append(forzarNumero(c[i])); // El resto siempre números
-                }
+        if (len == 6) {
+            String res = forzarPatron(raw, "LLLNNN");
+            if (res.matches(PATTERN_URU_MOTO)) return res;
+        }
+
+        if (len == 7) {
+
+            // 1. Prioridad: Uruguay Auto (LLL NNNN)
+            String uru = forzarPatron(raw, "LLLNNNN");
+            if (uru.matches(PATTERN_URU_AUTO)) {
+                return uru;
             }
-            return res.toString();
+
+            // 2. Mercosur Argentina (LL NNN LL)
+            String arg = forzarPatron(raw, "LLNNNLL");
+            if (arg.matches(PATTERN_MERCOSUR_ARG)) return arg;
+
+            // 3. Mercosur Brasil (LLL N L NN)
+            if (Character.isDigit(raw.charAt(3)) || raw.charAt(3) == 'I' || raw.charAt(3) == 'O') {
+                String bra = forzarPatron(raw, "LLLNLNN");
+                if (bra.matches(PATTERN_MERCOSUR_BRA)) return bra;
+            }
         }
 
-        // es mercosur argentina (AA 123 BB)
-        if (candidato.matches("^[A-Z0-9]{2}[0-9A-Z]{3}[A-Z0-9]{2}$")) {
-            char[] c = candidato.toCharArray();
-            return "" + forzarLetra(c[0]) + forzarLetra(c[1]) +
-                    forzarNumero(c[2]) + forzarNumero(c[3]) + forzarNumero(c[4]) +
-                    forzarLetra(c[5]) + forzarLetra(c[6]);
-        }
+        return raw;
+    }
 
-        return candidato;
+    private static String forzarPatron(String raw, String mascara) {
+        char[] c = raw.toCharArray();
+        char[] m = mascara.toCharArray();
+        StringBuilder res = new StringBuilder();
+
+        for (int i = 0; i < c.length; i++) {
+            if (m[i] == 'L') res.append(forzarLetra(c[i]));
+            else res.append(forzarNumero(c[i]));
+        }
+        return res.toString();
     }
 
     private static char forzarLetra(char c) {
@@ -58,6 +84,7 @@ public class PlateValidator {
             case '0': return 'O';
             case '1': return 'I';
             case '2': return 'Z';
+            case '4': return 'A';
             case '5': return 'S';
             case '8': return 'B';
             default: return c;
@@ -69,11 +96,13 @@ public class PlateValidator {
             case 'O': case 'Q': case 'G': return '0';
             case 'I': case 'L': return '1';
             case 'Z': return '2';
+            case 'A': return '4';
             case 'S': return '5';
             case 'B': return '8';
             default: return c;
         }
     }
+
 
     public static String calcularConfianza(String patente, int votos) {
         if (patente == null || patente.isEmpty()) return "NULA";
@@ -85,10 +114,14 @@ public class PlateValidator {
 
         boolean esOficial = uruArg || mercosurArg || mercosurBra;
 
-        if (votos >= 4 && esOficial) return "MUY ALTA";
-        if (votos >= 2 && esOficial) return "ALTA";
-        if (votos >= 3) return "MEDIA";
-
-        return "BAJA";
+        if (esOficial) {
+            if (votos >= 10) return "MUY ALTA"; // Casi todos los filtros coincidieron
+            if (votos >= 7)  return "ALTA";     // Al menos un tercio
+            if (votos >= 5)  return "MEDIA";    // Solo funcionó en algunos filtros específicos
+            return "BAJA";
+        } else {
+            if (votos >= 7) return "MEDIA RARA";
+            return "BAJA";
+        }
     }
 }

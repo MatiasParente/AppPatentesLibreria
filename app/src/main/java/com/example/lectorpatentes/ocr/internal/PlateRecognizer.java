@@ -51,6 +51,10 @@ public class PlateRecognizer {
                     PlateFilter.plancharPatenteLadoIzquierdo(base),// 7. Binarización suave
                     PlateFilter.aplicarSharpen(PlateFilter.plancharPatenteLadoIzquierdo(base)), // 8. sharpen + izquierda
                     PlateFilter.aplicarSharpen(PlateFilter.corregirArriba(base)), // 9. sharpen+ arriba
+                    PlateFilter.plancharEsquinaSuperiorDerecha(base),
+                    PlateFilter.plancharEsquinaSuperiorIzquierda(base),
+                    PlateFilter.aplicarSharpen(PlateFilter.plancharEsquinaSuperiorDerecha(base)),
+                    PlateFilter.aplicarSharpen(PlateFilter.plancharEsquinaSuperiorIzquierda(base)),
                     PlateFilter.corregirBrilloMotos(base)                                 // 10. Filtro Motos
             };
 
@@ -60,7 +64,7 @@ public class PlateRecognizer {
             for (int i = 0; i < versions.length; i++) {
                 Bitmap bmp = versions[i];
 
-                boolean esVersionTorcida = (i == 2 || i == 3 || i == 4 || i == 5 || i == 7 || i == 8 || i == 9);
+                boolean esVersionTorcida = i >= 2;
 
                 Bitmap bmpFinal;
                 if (esVersionTorcida) {
