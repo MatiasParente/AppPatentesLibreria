@@ -29,9 +29,9 @@ public class PlateRecognizer {
     }
 
     public void analyze(Bitmap plateCrop, ScannerCallback callback) {
+
         executor.execute(() -> {
-            androidx.renderscript.RenderScript rs = androidx.renderscript.RenderScript.create(context);
-            // 1. Pre-procesamiento: Reescalado inteligente (Máximo 900px de ancho)
+            // Pre-procesamiento: Reescalado inteligente (Máximo 900px de ancho)
             int targetW = Math.min(plateCrop.getWidth() * 2, 600);
             float ratio = (float) targetW / plateCrop.getWidth();
             int targetH = (int) (plateCrop.getHeight() * ratio);
@@ -39,21 +39,19 @@ public class PlateRecognizer {
             Bitmap base = Bitmap.createScaledBitmap(plateCrop, targetW, targetH, true)
                     .copy(Bitmap.Config.ARGB_8888, false);
 
-
-            try {
-
-                Bitmap[] versions = {
-                        base,
-                        PlateFilter.aplicarSharpen(rs, base),                                                                // 1. Original
-                    PlateFilter.aplicarSharpen(rs, base),                            // 2. Sharpen
-                    PlateFilter.corregirPerspectivaSimulada(base),                       // 3. Estiramiento Horizontal
-                    PlateFilter.corregirPicadoCenital(base),                             // 4. Estiramiento Vertical
-                    PlateFilter.plancharPatenteExtremadamenteDoblada(rs, base),      // 5. MODO EXTREMO
-                    PlateFilter.aplicarSharpen(rs, PlateFilter.plancharPatenteExtremadamenteDoblada(rs, base)), // 6. Combo Extremo
+            // 11 versiones con los filtros de PlateFilter
+            Bitmap[] versions = {
+                    base,                                                                 // 1. Original
+                    PlateFilter.aplicarSharpen(base),                            // 2. Sharpen
+                    PlateFilter.corregirPerspectiva(base),                       // 3. Estiramiento Horizontal
+                    PlateFilter.corregirArriba(base),                             // 4. Estiramiento Vertical
+                    PlateFilter.plancharPatenteLadoDerecho(base),      // 5. plancha derecha
+                    PlateFilter.aplicarSharpen(PlateFilter.plancharPatenteLadoDerecho(base)), // 6. sharpen + derecha
                     PlateFilter.ajustarBrilloContraste(base, 2.0f, -50f),
-                    PlateFilter.plancharPatenteLadoIzquierdo(rs, base),// 7. Binarización suave
-                    PlateFilter.aplicarSharpen(rs, PlateFilter.corregirPicadoCenital(base)), // 8. Combo Cenital
-                    PlateFilter.corregirBrilloMotos(base)                                 // 9. Filtro Motos/Contraste fuerte
+                    PlateFilter.plancharPatenteLadoIzquierdo(base),// 7. Binarización suave
+                    PlateFilter.aplicarSharpen(PlateFilter.plancharPatenteLadoIzquierdo(base)), // 8. sharpen + izquierda
+                    PlateFilter.aplicarSharpen(PlateFilter.corregirArriba(base)), // 9. sharpen+ arriba
+                    PlateFilter.corregirBrilloMotos(base)                                 // 10. Filtro Motos
             };
 
             Map<String, Integer> votes = new HashMap<>();
@@ -62,18 +60,16 @@ public class PlateRecognizer {
             for (int i = 0; i < versions.length; i++) {
                 Bitmap bmp = versions[i];
 
-                // Si es la versión 3, 4, 5, 6 u 8 (las de perspectiva/planchado),
-                // NO aplicamos recorte para no comer letras en los bordes.
-                boolean esVersionTorcida = (i == 2 || i == 3 || i == 4 || i == 5 || i == 7);
+                boolean esVersionTorcida = (i == 2 || i == 3 || i == 4 || i == 5 || i == 7 || i == 8 || i == 9);
 
                 Bitmap bmpFinal;
                 if (esVersionTorcida) {
-                    bmpFinal = bmp; // Usamos la imagen completa
+                    bmpFinal = bmp; // Mantenemos la imagen estirada completa para no perder bordes
                 } else {
-                    // Recorte solo para fotos frontales
                     int marginW = (int)(bmp.getWidth() * 0.05);
                     int marginTop = (int)(bmp.getHeight() * 0.12);
                     int marginBot = (int)(bmp.getHeight() * 0.05);
+
                     int finalW = bmp.getWidth() - (marginW * 2);
                     int finalH = bmp.getHeight() - marginTop - marginBot;
 
@@ -99,11 +95,6 @@ public class PlateRecognizer {
                             checkFinal(completedFrames, versions.length, votes, plateCrop, callback, versions);
                         });
             }
-            } finally {
-                // Esto se ejecuta SIEMPRE, incluso si hay error.
-                // Es lo que va a evitar que el TCL explote al sexto tiro.
-                rs.destroy();
-            }
         });
     }
 
@@ -124,7 +115,6 @@ public class PlateRecognizer {
 
             String confidence = PlateValidator.calcularConfianza(bestPlate, maxVotes);
 
-            // --- LA LIMPIEZA MÁGICA PARA EL TCL ---
             for (Bitmap b : versionsToRecycle) {
                 if (b != null && !b.isRecycled() && b != crop) {
                     try {
