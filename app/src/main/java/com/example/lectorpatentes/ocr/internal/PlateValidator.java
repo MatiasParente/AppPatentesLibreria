@@ -105,9 +105,9 @@ public class PlateValidator {
         if (cambios > 3) score -= 3;
 
         if (oficial) {
-            if (score >= 10) return "MUY ALTA";
-            if (score >= 6) return "ALTA";
-            if (score >= 3) return "MEDIA";
+            if (score >= 12) return "MUY ALTA";
+            if (score >= 8) return "ALTA";
+            if (score >= 5) return "MEDIA";
         }
         return "BAJA";
     }

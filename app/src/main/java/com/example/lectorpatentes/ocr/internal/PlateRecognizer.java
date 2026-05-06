@@ -39,7 +39,7 @@ public class PlateRecognizer {
             Bitmap base = Bitmap.createScaledBitmap(plateCrop, targetW, targetH, true)
                     .copy(Bitmap.Config.ARGB_8888, false);
 
-            // 15 versiones con los filtros
+            // 18 versiones con los filtros
             Bitmap[] versions = {
                     base,
                     PlateFilter.aplicarSharpen(base),
@@ -55,7 +55,10 @@ public class PlateRecognizer {
                     PlateFilter.plancharEsquinaSuperiorIzquierda(base),
                     PlateFilter.aplicarSharpen(PlateFilter.plancharEsquinaSuperiorDerecha(base)),
                     PlateFilter.aplicarSharpen(PlateFilter.plancharEsquinaSuperiorIzquierda(base)),
-                    PlateFilter.corregirBrilloMotos(base)
+                    PlateFilter.corregirBrilloMotos(base),
+                    PlateFilter.aclararImagenOscura(base),
+                    PlateFilter.reducirReflejos(base),
+                    PlateFilter.filtroSuciedad(base)
             };
 
             Map<String, Integer> votes = new HashMap<>();

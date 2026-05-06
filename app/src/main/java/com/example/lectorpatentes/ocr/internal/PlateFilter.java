@@ -132,11 +132,8 @@ public class PlateFilter {
         Bitmap dst = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(dst);
 
-        // Definimos hacia dónde queremos llevar los puntos (un rectángulo perfecto)
         float[] dstPoints = {0, 0, w, 0, w, h, 0, h};
 
-        // Mapeamos la deformación:
-        // La esquina superior derecha (punto 2) está "lejos", la estiramos.
         float[] srcPoints = {
                 w * 0.10f, h * 0.35f,
                 w * 0.95f, h * 0.05f,
@@ -174,5 +171,35 @@ public class PlateFilter {
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
         canvas.drawBitmap(src, matrix, paint);
         return dst;
+    }
+
+    // Aclarar imágenes oscuras (Noche, lluvia, sombras)
+    public static Bitmap aclararImagenOscura(Bitmap src) {
+        return ajustarBrilloContraste(src, 1.5f, 60f);
+    }
+
+    // Reducir reflejos extremos de sol o flash
+    public static Bitmap reducirReflejos(Bitmap src) {
+        Bitmap dest = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(dest);
+        ColorMatrix cm = new ColorMatrix();
+
+        cm.setSaturation(0);
+        cm.postConcat(new ColorMatrix(new float[] {
+                4.0f, 0, 0, 0, -150f,
+                0, 4.0f, 0, 0, -150f,
+                0, 0, 4.0f, 0, -150f,
+                0, 0, 0, 1, 0
+        }));
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        paint.setColorFilter(new ColorMatrixColorFilter(cm));
+        canvas.drawBitmap(src, 0, 0, paint);
+        return dest;
+    }
+
+    // Resaltar letras tapadas por suciedad
+    public static Bitmap filtroSuciedad(Bitmap src) {
+        return ajustarBrilloContraste(src, 2.5f, -10f);
     }
 }
