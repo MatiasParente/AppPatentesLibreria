@@ -16,14 +16,11 @@ public class PlateScanner {
     }
 
     public void processImage(Bitmap original, ScannerCallback callback) {
-        // Buscamos la patente en la foto grande
         Bitmap crop = detector.detectBestPlate(original);
 
         if (crop == null) {
-            // Si no detectó la placa, devolvemos null inmediatamente
-            callback.onResult(null, "NULA", null);
+            callback.onResult(null, null);
         } else {
-            // 2. Si la encontró, se la pasamos al reconocedor de texto
             recognizer.analyze(crop, callback);
         }
     }

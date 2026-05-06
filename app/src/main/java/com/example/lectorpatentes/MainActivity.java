@@ -88,10 +88,18 @@ public class MainActivity extends AppCompatActivity {
                 visor.setImageBitmap(bitmap);
                 txtResultado.setText("Buscando patente...");
 
-                scanner.processImage(bitmap, (patente, confianza, recorte) -> {
+                // ACÁ ESTÁ EL CAMBIO: Ahora recibimos (resultado, recorte)
+                scanner.processImage(bitmap, (resultado, recorte) -> {
                     runOnUiThread(() -> {
-                        if (patente != null) {
-                            txtResultado.setText("PATENTE: " + patente + "\nConfianza: " + confianza);
+                        if (resultado != null) {
+                            // Extraemos los datos del objeto ResultPlate
+                            String textoAviso = "PATENTE: " + resultado.patente +
+                                    "\nConfianza: " + resultado.confianza +
+                                    "\nCaracteres Forzados: " + resultado.cantidadCambios +
+                                    "\nPosiciones: [" + resultado.posicionesCambiadas + "]";
+
+                            txtResultado.setText(textoAviso);
+
                             if (recorte != null) visor.setImageBitmap(recorte);
                         } else {
                             txtResultado.setText("No se detectó ninguna patente.");
