@@ -1,4 +1,4 @@
-package com.example.lectorpatentes.ocr;
+package com.example.lectorpatenteslibreria.ocr;
 
 import android.graphics.Bitmap;
 

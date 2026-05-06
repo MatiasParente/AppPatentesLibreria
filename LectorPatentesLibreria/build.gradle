@@ -1,19 +1,17 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
 }
 
 android {
-    namespace 'com.example.lectorpatentes'
+    namespace 'com.example.lectorpatenteslibreria'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.lectorpatentes"
         minSdk 28
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -33,7 +31,7 @@ android {
 }
 
 dependencies {
-    // Librerías base de Android (Versiones estables para SDK 33)
+
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -45,6 +43,5 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:2.14.0'
     implementation 'org.tensorflow:tensorflow-lite-support:0.4.4'
     implementation 'org.tensorflow:tensorflow-lite-task-vision:0.4.4'
-    implementation project(':LectorPatentesLibreria')
 
 }

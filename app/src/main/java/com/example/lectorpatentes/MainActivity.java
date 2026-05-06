@@ -16,7 +16,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.lectorpatentes.ocr.PlateScanner;
+import com.example.lectorpatenteslibreria.ocr.PlateScanner;
 
 import java.io.File;
 import java.io.IOException;

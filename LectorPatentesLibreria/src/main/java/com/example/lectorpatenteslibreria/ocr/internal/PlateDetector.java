@@ -1,4 +1,4 @@
-package com.example.lectorpatentes.ocr.internal;
+package com.example.lectorpatenteslibreria.ocr.internal;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;

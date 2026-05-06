@@ -1,15 +1,15 @@
-package com.example.lectorpatentes.ocr.internal;
+package com.example.lectorpatenteslibreria.ocr.internal;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.example.lectorpatentes.ocr.ResultPlate;
+import com.example.lectorpatenteslibreria.ocr.ResultPlate;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
-import com.example.lectorpatentes.ocr.ScannerCallback;
+import com.example.lectorpatenteslibreria.ocr.ScannerCallback;
 
 import java.util.HashMap;
 import java.util.Map;

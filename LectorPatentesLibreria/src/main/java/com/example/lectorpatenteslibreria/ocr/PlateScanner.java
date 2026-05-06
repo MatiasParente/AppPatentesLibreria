@@ -1,9 +1,9 @@
-package com.example.lectorpatentes.ocr;
+package com.example.lectorpatenteslibreria.ocr;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import com.example.lectorpatentes.ocr.internal.PlateDetector;
-import com.example.lectorpatentes.ocr.internal.PlateRecognizer;
+import com.example.lectorpatenteslibreria.ocr.internal.PlateDetector;
+import com.example.lectorpatenteslibreria.ocr.internal.PlateRecognizer;
 
 public class PlateScanner {
 
