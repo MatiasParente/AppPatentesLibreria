@@ -41,21 +41,32 @@ public class PlateValidator {
         }
 
         if (len == 7) {
-            // 1. Uruguay Auto
+            // Generamos los 3 candidatos posibles
             ValidationResult uru = forzarPatron(raw, "LLLNNNN");
-            if (uru.texto.matches(PATTERN_URU_AUTO)) return uru;
-
-            // 2. Mercosur Argentina
             ValidationResult arg = forzarPatron(raw, "LLNNNLL");
-            if (arg.texto.matches(PATTERN_MERCOSUR_ARG)) return arg;
+            ValidationResult bra = forzarPatron(raw, "LLLNLNN");
 
-            // 3. Mercosur Brasil
-            if (Character.isDigit(raw.charAt(3)) || raw.charAt(3) == 'I') {
-                ValidationResult bra = forzarPatron(raw, "LLLNLNN");
-                if (bra.texto.matches(PATTERN_MERCOSUR_BRA)) return bra;
+            // Buscamos cuál tuvo menos cambios
+            ValidationResult mejorCandidato = uru;
+
+            if (arg.cambios < mejorCandidato.cambios) {
+                mejorCandidato = arg;
             }
+
+            if (bra.cambios < mejorCandidato.cambios) {
+                mejorCandidato = bra;
+            }
+
+            // Si hay empate en cambios,
+            // le damos prioridad a Uruguay por ser el mercado principal
+            if (uru.cambios <= mejorCandidato.cambios) {
+                mejorCandidato = uru;
+            }
+
+            return mejorCandidato;
         }
-        return new ValidationResult(raw, 0, ""); // Sin cambios detectados
+
+        return new ValidationResult(raw, 0, "");
     }
 
     private static ValidationResult forzarPatron(String raw, String mascara) {

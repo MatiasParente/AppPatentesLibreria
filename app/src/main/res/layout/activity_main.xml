@@ -42,7 +42,7 @@
         android:gravity="center"
         android:text="Presiona el botón para escanear"
         android:textSize="18sp"
-        android:textColor="@color/white"
+        android:textColor="#FF0000"
         app:layout_constraintBottom_toTopOf="@+id/btnCamara"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
