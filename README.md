@@ -19,7 +19,10 @@ A diferencia de un OCR estándar, esta librería utiliza un proceso de 5 etapas 
 ## Instalación
 
 ### 1. Agregar el archivo `.aar`
-Copia el archivo LectorPatentesLibreria-release.aar dentro de la carpeta libs/ de tu módulo app.
+Copia el archivo `LectorPatentesLibreria-release.aar` dentro de la carpeta libs/ de tu módulo app.
+
+**Descarga**
+Puedes descargar la última versión del archivo `.aar` desde la sección de [Releases]
 
 ### 2. Configurar `build.gradle` (Module: app)
 Agrega la referencia local y las dependencias necesarias:
