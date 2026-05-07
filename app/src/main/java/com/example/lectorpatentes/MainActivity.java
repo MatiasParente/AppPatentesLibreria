@@ -40,15 +40,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 1. Vincular UI
         visor = findViewById(R.id.imageView);
         txtResultado = findViewById(R.id.txtResultado);
         btnCamara = findViewById(R.id.btnCamara);
 
-        // 2. Inicializar nuestro motor de escaneo
         scanner = new PlateScanner(this);
 
-        // 3. Evento del botón
         btnCamara.setOnClickListener(v -> abrirCamara());
     }
 
@@ -88,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
                 visor.setImageBitmap(bitmap);
                 txtResultado.setText("Buscando patente...");
 
-                // ACÁ ESTÁ EL CAMBIO: Ahora recibimos (resultado, recorte)
                 scanner.processImage(bitmap, (resultado, recorte) -> {
                     runOnUiThread(() -> {
                         if (resultado != null) {
